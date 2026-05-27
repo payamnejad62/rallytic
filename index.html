@@ -11,6 +11,15 @@
 </head>
 <body>
 
+  <!-- Scroll progress bar -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Page loader -->
+  <div class="page-loader" id="pageLoader">
+    <div class="loader-ball">🎾</div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+  </div>
+
   <!-- ─── NAVIGATION ─────────────────────────────────────────── -->
   <nav id="navbar">
     <div class="nav-inner">
@@ -34,30 +43,36 @@
 
   <!-- ─── HERO ───────────────────────────────────────────────── -->
   <section id="home" class="hero">
-    <div class="hero-bg"></div>
+    <div class="hero-bg" id="heroBg"></div>
     <div class="hero-overlay"></div>
+    <div class="hero-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="floating-ball" id="floatingBall">🎾</div>
     <div class="hero-content">
-      <p class="hero-tag">World-Class Tennis Training</p>
-      <h1 class="hero-title">
+      <p class="hero-tag reveal-item" style="--d:0">World-Class Tennis Training</p>
+      <h1 class="hero-title reveal-item" style="--d:1">
         Elevate Your <br />
-        <span class="accent">Tennis Game</span>
+        <span class="accent typed-text" id="typedText"></span>
       </h1>
-      <p class="hero-sub">
+      <p class="hero-sub reveal-item" style="--d:2">
         Professional coaching for all levels — from first-time beginners to competitive players.
         Join over <strong>500 members</strong> training on our premium courts.
       </p>
-      <div class="hero-actions">
-        <a href="#register" class="btn btn-primary">Start Training Today</a>
-        <a href="#classes" class="btn btn-outline">View Classes</a>
+      <div class="hero-actions reveal-item" style="--d:3">
+        <a href="#register" class="btn btn-primary magnetic-btn">Start Training Today</a>
+        <a href="#classes" class="btn btn-outline magnetic-btn">View Classes</a>
       </div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num">15+</span><span class="stat-label">Years of Excellence</span></div>
+      <div class="hero-stats reveal-item" style="--d:4">
+        <div class="stat"><span class="stat-num counter" data-target="15" data-suffix="+">0</span><span class="stat-label">Years of Excellence</span></div>
         <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">12</span><span class="stat-label">Expert Coaches</span></div>
+        <div class="stat"><span class="stat-num counter" data-target="12">0</span><span class="stat-label">Expert Coaches</span></div>
         <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">8</span><span class="stat-label">Premium Courts</span></div>
+        <div class="stat"><span class="stat-num counter" data-target="8">0</span><span class="stat-label">Premium Courts</span></div>
         <div class="stat-divider"></div>
-        <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Happy Members</span></div>
+        <div class="stat"><span class="stat-num counter" data-target="500" data-suffix="+">0</span><span class="stat-label">Happy Members</span></div>
       </div>
     </div>
     <div class="hero-scroll">
