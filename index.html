@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
 </head>
 <body>
 
@@ -50,10 +51,10 @@
       <div class="orb orb-2"></div>
       <div class="orb orb-3"></div>
     </div>
-    <div class="floating-ball" id="floatingBall">🎾</div>
+    <canvas id="heroGlobe" class="hero-globe"></canvas>
     <div class="hero-content">
       <p class="hero-tag reveal-item" style="--d:0">World-Class Tennis Training</p>
-      <h1 class="hero-title reveal-item" style="--d:1">
+      <h1 class="hero-title hero-title-3d reveal-item" id="heroTitle3d" style="--d:1">
         Elevate Your <br />
         <span class="accent typed-text" id="typedText"></span>
       </h1>
@@ -666,5 +667,6 @@
   <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
   <script src="script.js"></script>
+  <script src="globe.js"></script>
 </body>
 </html>
