@@ -292,3 +292,23 @@ export const ACAD_SUB = {
   nextRenewal: "Jan 1, 2027",
   method: { brand: "Visa", last4: "4242", holder: "Berlin Tennis Academy", expiry: "08 / 28" },
 };
+
+// Iran payment integration
+export const IRAN_PAYMENT = {
+  // 1 USD = 60,000 Toman (editable when central rate changes)
+  usdToToman: 60000,
+  // Bank transfer details for receipt-based payments
+  bank: {
+    name: "Bank Mellat",
+    accountHolder: "Rallytic Iran",
+    cardNumber: "6104-3378-1234-5678",
+    sheba: "IR62-0120-0000-0000-1234-5678-91",
+    accountNumber: "1234-5678-9012-34",
+  },
+  // Recent Iran-payment activity (used in Payments tab)
+  recentPayments: [
+    { id: "ir-1", academy: "Tehran Tennis Club", method: "Zarinpal", amount: 14040000, usd: 234, date: "May 12", status: "paid" as const },
+    { id: "ir-2", academy: "Isfahan Sport Academy", method: "Bank transfer", amount: 14040000, usd: 234, date: "May 10", status: "verifying" as const },
+    { id: "ir-3", academy: "Shiraz Tennis Center", method: "Zarinpal", amount: 28080000, usd: 468, date: "May 8", status: "paid" as const },
+  ],
+};

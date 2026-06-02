@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { Topbar, GhostBtn, PrimaryBtn } from "@/components/shell";
 import { Icon } from "@/components/icon";
-import { ACAD_PLANS, ACAD_SUB } from "@/lib/academy-data";
+import { ACAD_PLANS, ACAD_SUB, IRAN_PAYMENT } from "@/lib/academy-data";
+
+const TOMAN = new Intl.NumberFormat("en-US");
+function toToman(usd: number) {
+  return TOMAN.format(usd * IRAN_PAYMENT.usdToToman);
+}
 
 function Styles() {
   return (
@@ -64,6 +69,43 @@ function Styles() {
 .bl-sum-row.discount .v{color:var(--accent)}
 .bl-sum-total{display:flex;justify-content:space-between;padding-top:14px;margin-top:8px;border-top:2px solid var(--hairline2);font-size:14px;font-weight:800}
 .bl-sum-total .v{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:24px;color:var(--accent)}
+
+.bl-region{display:flex;gap:8px;margin-bottom:14px}
+.bl-region button{flex:1;padding:12px 14px;border-radius:10px;background:var(--surface3);border:1px solid var(--hairline2);color:var(--fgDim);font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:10px;justify-content:center;transition:.15s}
+.bl-region button.on{background:linear-gradient(180deg,rgba(168,216,71,0.10),transparent);border-color:var(--accent);color:var(--accent)}
+.bl-region button .flag{font-size:18px}
+.bl-region button .sub{font-size:10px;color:var(--fgMute);font-weight:600;margin-top:2px;display:block;letter-spacing:0;text-transform:none}
+
+.bl-iran-banner{margin-top:10px;padding:10px 14px;background:rgba(168,216,71,0.06);border:1px solid var(--accentRing);border-radius:10px;font-size:12px;color:var(--fgDim);display:flex;align-items:center;gap:10px}
+.bl-iran-banner strong{color:var(--accent);font-weight:700}
+
+.bl-gateway{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.bl-gateway-opt{padding:14px;border-radius:10px;border:1px solid var(--hairline2);background:var(--surface3);cursor:pointer;text-align:left;font-family:inherit;color:inherit;display:flex;flex-direction:column;gap:8px;position:relative;transition:.15s}
+.bl-gateway-opt:hover{border-color:var(--accentRing)}
+.bl-gateway-opt.on{border-color:var(--accent);background:linear-gradient(180deg,rgba(168,216,71,0.06),transparent);box-shadow:0 0 0 1px rgba(168,216,71,.18)}
+.bl-gateway-opt .gh{display:flex;align-items:center;gap:10px}
+.bl-gateway-opt .gh .ic{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--accent);background:var(--accentBg);font-size:16px}
+.bl-gateway-opt .gn{font-size:14px;font-weight:800}
+.bl-gateway-opt .gs{font-size:11px;color:var(--fgMute);line-height:1.5}
+.bl-gateway-opt .radio{position:absolute;top:14px;right:14px;width:16px;height:16px;border-radius:50%;border:2px solid var(--hairline2);display:grid;place-items:center}
+.bl-gateway-opt.on .radio{border-color:var(--accent);background:var(--accent)}
+.bl-gateway-opt.on .radio::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--accentInk)}
+
+.bl-bank-card{margin-top:14px;padding:14px;background:var(--surface3);border:1px solid var(--hairline2);border-radius:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 16px}
+.bl-bank-row{font-size:12px}
+.bl-bank-row.full{grid-column:1/-1}
+.bl-bank-row .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--fgMute);font-weight:700;margin-bottom:3px}
+.bl-bank-row .v{font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--fg);font-weight:700;letter-spacing:.04em}
+.bl-bank-row .copy{font-size:10px;color:var(--accent);margin-left:6px;cursor:pointer}
+
+.bl-upload{margin-top:14px;padding:18px;border:2px dashed var(--hairline2);border-radius:10px;text-align:center;cursor:pointer;color:var(--fgDim);transition:.15s}
+.bl-upload:hover{border-color:var(--accentRing);color:var(--accent)}
+.bl-upload .ic{font-size:22px;color:var(--accent);display:block;margin-bottom:6px}
+.bl-upload-h{font-size:13px;font-weight:700;color:var(--fg)}
+.bl-upload-s{font-size:11px;color:var(--fgMute);margin-top:3px}
+
+.bl-toman-row{display:flex;justify-content:space-between;padding:8px 0;font-size:11.5px;color:var(--fgMute);font-style:italic}
+.bl-toman-row .v{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600}
 `}</style>
   );
 }
@@ -72,6 +114,8 @@ export default function AcademyBillingPage() {
   const [selected, setSelected] = useState("elite");
   const [coaches, setCoaches] = useState(6);
   const [cycle, setCycle] = useState<"monthly" | "annual">("annual");
+  const [region, setRegion] = useState<"intl" | "iran">("intl");
+  const [iranGw, setIranGw] = useState<"zarinpal" | "bank">("zarinpal");
   const plan = ACAD_PLANS.find((p) => p.id === selected)!;
   const monthlyPerSeat = plan.perCoach;
   const subtotal =
@@ -237,40 +281,204 @@ export default function AcademyBillingPage() {
               <span>Payment method</span>
               <span style={{ color: "var(--fgMute)", letterSpacing: 0 }}>Charged on renewal</span>
             </div>
-            <div className="bl-card-on-file">
-              <div className="bl-card-brand">VISA</div>
-              <div className="bl-card-text">
-                <strong>Visa ending 4242</strong>
-                <small>Exp. 08 / 28 · Berlin Tennis Academy</small>
-              </div>
-              <span className="bl-card-default">Default</span>
+
+            <div className="bl-region">
+              <button
+                type="button"
+                className={region === "intl" ? "on" : ""}
+                onClick={() => setRegion("intl")}
+              >
+                <span className="flag">🌍</span>
+                <span>
+                  International
+                  <span className="sub">Visa · Mastercard · Amex</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                className={region === "iran" ? "on" : ""}
+                onClick={() => setRegion("iran")}
+              >
+                <span className="flag">🇮🇷</span>
+                <span>
+                  Pay from Iran
+                  <span className="sub">Zarinpal · Bank transfer · IRR</span>
+                </span>
+              </button>
             </div>
 
-            <div style={{ marginTop: 18, fontSize: 11, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--fgMute)", fontWeight: 700 }}>
-              Or pay with a new card
-            </div>
-            <div className="bl-form">
-              <div className="full">
-                <label>Cardholder name</label>
-                <input type="text" defaultValue="Berlin Tennis Academy" />
-              </div>
-              <div className="full">
-                <label>Card number</label>
-                <input type="text" placeholder="4242 4242 4242 4242" />
-              </div>
-              <div className="half">
-                <label>Expiry</label>
-                <input type="text" placeholder="MM / YY" />
-              </div>
-              <div className="half">
-                <label>CVC</label>
-                <input type="text" placeholder="123" />
-              </div>
-              <div className="full">
-                <label>Billing country</label>
-                <input type="text" defaultValue="Germany" />
-              </div>
-            </div>
+            {region === "intl" && (
+              <>
+                <div className="bl-card-on-file">
+                  <div className="bl-card-brand">VISA</div>
+                  <div className="bl-card-text">
+                    <strong>Visa ending 4242</strong>
+                    <small>Exp. 08 / 28 · Berlin Tennis Academy</small>
+                  </div>
+                  <span className="bl-card-default">Default</span>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 18,
+                    fontSize: 11,
+                    letterSpacing: ".16em",
+                    textTransform: "uppercase",
+                    color: "var(--fgMute)",
+                    fontWeight: 700,
+                  }}
+                >
+                  Or pay with a new card
+                </div>
+                <div className="bl-form">
+                  <div className="full">
+                    <label>Cardholder name</label>
+                    <input type="text" defaultValue="Berlin Tennis Academy" />
+                  </div>
+                  <div className="full">
+                    <label>Card number</label>
+                    <input type="text" placeholder="4242 4242 4242 4242" />
+                  </div>
+                  <div className="half">
+                    <label>Expiry</label>
+                    <input type="text" placeholder="MM / YY" />
+                  </div>
+                  <div className="half">
+                    <label>CVC</label>
+                    <input type="text" placeholder="123" />
+                  </div>
+                  <div className="full">
+                    <label>Billing country</label>
+                    <input type="text" defaultValue="Germany" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {region === "iran" && (
+              <>
+                <div className="bl-iran-banner">
+                  <Icon name="info-circle" style={{ color: "var(--accent)", fontSize: 18 }} />
+                  <span>
+                    Total in Toman: <strong>{toToman(total)} IRR</strong>{" "}
+                    <span style={{ color: "var(--fgMute)" }}>
+                      (rate ${1} = {TOMAN.format(IRAN_PAYMENT.usdToToman)} IRR)
+                    </span>
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 18,
+                    fontSize: 11,
+                    letterSpacing: ".16em",
+                    textTransform: "uppercase",
+                    color: "var(--fgMute)",
+                    fontWeight: 700,
+                  }}
+                >
+                  Choose a payment method
+                </div>
+                <div className="bl-gateway">
+                  <button
+                    type="button"
+                    className={"bl-gateway-opt " + (iranGw === "zarinpal" ? "on" : "")}
+                    onClick={() => setIranGw("zarinpal")}
+                  >
+                    <div className="radio" />
+                    <div className="gh">
+                      <div className="ic">
+                        <Icon name="credit-card" />
+                      </div>
+                      <div className="gn">Zarinpal</div>
+                    </div>
+                    <div className="gs">
+                      Online IRR gateway. Instant confirmation, supports all Iranian bank
+                      cards (Shetab network).
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className={"bl-gateway-opt " + (iranGw === "bank" ? "on" : "")}
+                    onClick={() => setIranGw("bank")}
+                  >
+                    <div className="radio" />
+                    <div className="gh">
+                      <div className="ic">
+                        <Icon name="building-bank" />
+                      </div>
+                      <div className="gn">Bank transfer</div>
+                    </div>
+                    <div className="gs">
+                      Card-to-card or Sheba transfer. Upload receipt — verified within 24h.
+                    </div>
+                  </button>
+                </div>
+
+                {iranGw === "bank" && (
+                  <>
+                    <div className="bl-bank-card">
+                      <div className="bl-bank-row full">
+                        <div className="k">Bank · Account holder</div>
+                        <div className="v">
+                          {IRAN_PAYMENT.bank.name} · {IRAN_PAYMENT.bank.accountHolder}
+                        </div>
+                      </div>
+                      <div className="bl-bank-row full">
+                        <div className="k">Card number</div>
+                        <div className="v">
+                          {IRAN_PAYMENT.bank.cardNumber}{" "}
+                          <span className="copy">copy</span>
+                        </div>
+                      </div>
+                      <div className="bl-bank-row full">
+                        <div className="k">Sheba (IBAN)</div>
+                        <div className="v">
+                          {IRAN_PAYMENT.bank.sheba} <span className="copy">copy</span>
+                        </div>
+                      </div>
+                      <div className="bl-bank-row">
+                        <div className="k">Account number</div>
+                        <div className="v">{IRAN_PAYMENT.bank.accountNumber}</div>
+                      </div>
+                      <div className="bl-bank-row">
+                        <div className="k">Reference</div>
+                        <div className="v">ACAD-{ACAD_SUB.coaches}-{plan.id.toUpperCase()}</div>
+                      </div>
+                    </div>
+
+                    <label className="bl-upload">
+                      <Icon name="upload" className="ic" />
+                      <div className="bl-upload-h">Upload payment receipt</div>
+                      <div className="bl-upload-s">
+                        PNG / JPG / PDF · max 5 MB · verified within 24 hours
+                      </div>
+                      <input type="file" hidden />
+                    </label>
+                  </>
+                )}
+
+                {iranGw === "zarinpal" && (
+                  <div
+                    style={{
+                      marginTop: 14,
+                      padding: 14,
+                      background: "var(--surface3)",
+                      border: "1px solid var(--hairline2)",
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      color: "var(--fgDim)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    You&apos;ll be redirected to Zarinpal&apos;s secure checkout page (
+                    <span style={{ color: "var(--accent)" }}>zarinpal.com</span>) to complete
+                    payment with your Iranian bank card. Confirmation is instant and your
+                    subscription activates immediately on success.
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           <div className="bl-sum">
@@ -303,11 +511,22 @@ export default function AcademyBillingPage() {
               <span>Total / {cycle === "annual" ? "year" : "month"}</span>
               <span className="v">${total.toLocaleString()}</span>
             </div>
+            {region === "iran" && (
+              <div className="bl-toman-row">
+                <span>≈ Toman equivalent</span>
+                <span className="v">{toToman(total)} IRR</span>
+              </div>
+            )}
             <button
               className="r-btn r-btn-primary"
               style={{ width: "100%", marginTop: 14, padding: "12px 18px", fontSize: 14 }}
             >
-              <Icon name="lock" /> Update payment
+              <Icon name="lock" />{" "}
+              {region === "iran"
+                ? iranGw === "zarinpal"
+                  ? "Pay with Zarinpal"
+                  : "Submit bank transfer"
+                : "Update payment"}
             </button>
             <div
               style={{
@@ -318,7 +537,9 @@ export default function AcademyBillingPage() {
                 lineHeight: 1.5,
               }}
             >
-              Secure checkout · PCI compliant
+              {region === "iran"
+                ? "Iran gateway · IRR settlement · Shetab cards accepted"
+                : "Secure checkout · PCI compliant"}
             </div>
           </div>
         </div>
