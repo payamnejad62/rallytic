@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0A0D0A;
+  --surface1: #10141090;
+  --surface2: #141A14;
+  --surface3: #1A211A;
+  --hairline: #1F2820;
+  --hairline2: #283228;
+  --fg: #EAF0E6;
+  --fgDim: #9BA89B;
+  --fgMute: #5E6B5E;
+  --accent: #A8D847;
+  --accentDk: #8FBE2E;
+  --accentBg: rgba(168, 216, 71, 0.10);
+  --accentRing: rgba(168, 216, 71, 0.30);
+  --accentInk: #0E1A00;
+  --good: #A8D847;
+  --med: #F2B544;
+  --weak: #E5685D;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Barlow", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono,
+.mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Brand logo */
+.r-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.r-brand .rtile {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #C4F062 0%, #8FBE2E 100%);
+  color: #0E1A00;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-right: -2px;
+}
+.r-brand .txt {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  color: var(--fg);
+  line-height: 1;
+}
+.r-brand .txt .i {
+  color: var(--accent);
+}
+.r-brand.r-brand-lg .rtile {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  font-size: 36px;
+  box-shadow: 0 12px 40px rgba(168, 216, 71, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+.r-brand.r-brand-lg .txt {
+  font-size: 42px;
+}
+
+/* Toast */
+.toast-anchor {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--hairline2);
+  border-left: 3px solid var(--accent);
+  color: var(--fg);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  min-width: 240px;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  animation: toastIn 0.25s ease-out;
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hairline2);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4a3a;
+}
+
+/* Inputs */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fgDim);
+}
+.field input,
+.field select,
+.field textarea {
+  background: var(--surface3);
+  border: 1px solid var(--hairline2);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  color: var(--fg);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accentRing);
+  box-shadow: 0 0 0 3px rgba(168, 216, 71, 0.12);
+}
+.field input::placeholder {
+  color: var(--fgMute);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+  font-family: inherit;
+  padding: 11px 18px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.18s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--accentInk);
+}
+.btn-primary:hover {
+  background: #B8E055;
+  box-shadow: 0 10px 24px -10px rgba(168, 216, 71, 0.55);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fgDim);
+  border-color: var(--hairline2);
+}
+.btn-ghost:hover {
+  color: var(--fg);
+  border-color: var(--accentRing);
+}
+.btn-soft {
+  background: var(--accentBg);
+  color: var(--accent);
+  border-color: var(--accentRing);
+}
+.btn-soft:hover {
+  background: var(--accent);
+  color: var(--accentInk);
+}
+
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 18px;
+}
+.hairline {
+  background: var(--hairline);
+}
