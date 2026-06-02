@@ -579,3 +579,100 @@ body {
   min-height: 0;
   min-width: 0;
 }
+
+/* Reusable card stripes */
+.r-card {
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.r-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.r-card-title {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fgDim);
+  font-weight: 700;
+}
+.r-card-extra {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.r-card-body {
+  padding: 16px;
+}
+
+.r-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+.r-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--fgDim);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 12px;
+  transition: 0.15s;
+}
+.r-tab.on {
+  background: var(--accent);
+  color: var(--accentInk);
+  font-weight: 700;
+}
+
+.r-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.r-seg {
+  display: inline-flex;
+  padding: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  gap: 4px;
+}
+.r-seg button {
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--fgDim);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.r-seg button.on {
+  background: var(--accent);
+  color: var(--accentInk);
+}
