@@ -56,24 +56,26 @@ body[data-locale="fa"] {
 .lang-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
+  gap: 5px;
+  padding: 4px 7px;
   background: var(--surface2);
   border: 1px solid var(--hairline2);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--fg);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.15s;
+}
+.lang-trigger:hover {
+  border-color: var(--accentRing);
 }
 .lang-trigger img {
   border: 1px solid rgba(255, 255, 255, 0.10);
 }
 .lang-item-flag img {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 .lang-trigger:hover {
   border-color: var(--accentRing);
@@ -96,17 +98,18 @@ body[data-locale="fa"] {
 }
 .lang-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
   z-index: 100;
   background: var(--surface2);
   border: 1px solid var(--hairline2);
-  border-radius: 14px;
-  padding: 10px;
-  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.85);
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  gap: 8px;
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 110px;
 }
 [dir="rtl"] .lang-menu {
   right: auto;
@@ -114,37 +117,32 @@ body[data-locale="fa"] {
 }
 .lang-item-flag {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px 12px;
-  min-width: 56px;
-  background: var(--surface3);
-  border: 2px solid transparent;
-  border-radius: 10px;
+  gap: 9px;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
   cursor: pointer;
-  transition: 0.15s;
+  transition: 0.12s;
   font-family: inherit;
+  text-align: start;
 }
 .lang-item-flag:hover {
-  border-color: var(--accentRing);
-  transform: translateY(-2px);
-  background: var(--surface2);
+  background: var(--surface3);
 }
 .lang-item-flag.on {
-  border-color: var(--accent);
   background: rgba(168, 216, 71, 0.08);
-  box-shadow: 0 0 0 1px rgba(168, 216, 71, 0.25);
+  border-color: var(--accentRing);
 }
 .lang-flag-xl {
-  font-size: 28px;
+  font-size: 18px;
   line-height: 1;
   display: block;
 }
 .lang-code {
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   font-weight: 700;
   color: var(--fgMute);
   font-family: "JetBrains Mono", ui-monospace, monospace;

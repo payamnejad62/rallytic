@@ -75,7 +75,7 @@ export function LangSwitcher({ compact = false }: { compact?: boolean }) {
         aria-expanded={open}
         title={meta.native}
       >
-        <Flag locale={current} size={26} />
+        <Flag locale={current} size={20} />
         <span className="lang-caret">▾</span>
       </button>
       {open && (
@@ -93,7 +93,7 @@ export function LangSwitcher({ compact = false }: { compact?: boolean }) {
                 aria-selected={active}
                 title={`${m.native} — ${m.en}`}
               >
-                <Flag locale={loc} size={40} />
+                <Flag locale={loc} size={22} />
                 <span className="lang-code">{loc.toUpperCase()}</span>
               </button>
             );

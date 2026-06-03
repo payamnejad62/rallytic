@@ -259,14 +259,14 @@ const RSEL_CSS = `
   will-change:transform;
 }
 
-/* Full all-sides green halo behind card on hover, plus a soft outer glow */
+/* Soft all-sides green halo behind card on hover */
 #rsel .rs-glass::before{
   content:'';
   position:absolute;
-  inset:-90px;
-  border-radius:36px;
-  background:radial-gradient(ellipse 80% 70% at center,rgba(168,216,71,.55) 0%,rgba(168,216,71,.18) 35%,transparent 70%);
-  filter:blur(38px);
+  inset:-50px;
+  border-radius:30px;
+  background:radial-gradient(ellipse 75% 65% at center,rgba(168,216,71,.22) 0%,rgba(168,216,71,.08) 40%,transparent 72%);
+  filter:blur(28px);
   opacity:0;
   transition:opacity .55s ease;
   pointer-events:none;
@@ -285,9 +285,9 @@ const RSEL_CSS = `
   transform:translateY(-10px) scale(1.02);
   border-color:var(--accRing);
   box-shadow:
-    0 0 60px rgba(168,216,71,.45),
-    0 0 120px rgba(168,216,71,.25),
-    0 60px 110px -36px rgba(168,216,71,.45),
+    0 0 25px rgba(168,216,71,.18),
+    0 0 60px rgba(168,216,71,.10),
+    0 40px 80px -36px rgba(168,216,71,.25),
     0 0 0 1px var(--accRing);
 }
 
