@@ -5,6 +5,36 @@ import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n/config";
 
+// Map each locale → ISO country code for flag image
+const LOCALE_TO_COUNTRY: Record<Locale, string> = {
+  en: "gb",
+  fa: "ir",
+  fr: "fr",
+  es: "es",
+  de: "de",
+};
+
+function Flag({ locale, size = 32 }: { locale: Locale; size?: number }) {
+  const code = LOCALE_TO_COUNTRY[locale];
+  // Request a 2x-density image for crispness; flagcdn supports w40/w80/w160.
+  const src = `https://flagcdn.com/w80/${code}.png`;
+  return (
+    <img
+      src={src}
+      alt={LOCALE_NAMES[locale].en}
+      width={size}
+      height={size * 0.66}
+      style={{
+        width: size,
+        height: "auto",
+        display: "block",
+        borderRadius: 4,
+        objectFit: "cover",
+      }}
+    />
+  );
+}
+
 export function LangSwitcher({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const pathname = usePathname() || "/";
@@ -45,7 +75,7 @@ export function LangSwitcher({ compact = false }: { compact?: boolean }) {
         aria-expanded={open}
         title={meta.native}
       >
-        <span className="lang-flag-big">{meta.flag}</span>
+        <Flag locale={current} size={26} />
         <span className="lang-caret">▾</span>
       </button>
       {open && (
@@ -63,7 +93,7 @@ export function LangSwitcher({ compact = false }: { compact?: boolean }) {
                 aria-selected={active}
                 title={`${m.native} — ${m.en}`}
               >
-                <span className="lang-flag-xl">{m.flag}</span>
+                <Flag locale={loc} size={40} />
                 <span className="lang-code">{loc.toUpperCase()}</span>
               </button>
             );

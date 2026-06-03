@@ -56,8 +56,8 @@ body[data-locale="fa"] {
 .lang-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: 8px;
+  padding: 5px 10px;
   background: var(--surface2);
   border: 1px solid var(--hairline2);
   border-radius: 10px;
@@ -67,6 +67,13 @@ body[data-locale="fa"] {
   font-weight: 600;
   cursor: pointer;
   transition: 0.15s;
+}
+.lang-trigger img {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+.lang-item-flag img {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 .lang-trigger:hover {
   border-color: var(--accentRing);

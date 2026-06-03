@@ -120,7 +120,7 @@ export default function Page() {
 
   return (
     <div id="rsel">
-      <style>{RSEL_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: RSEL_CSS }} />
 
       <div key={`brand-${waveKey}`}>
         <BrandWave />
