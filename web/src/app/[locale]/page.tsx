@@ -1,42 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Brand } from "@/components/brand";
+import { useLocale, useTranslations } from "next-intl";
 import { Icon } from "@/components/icon";
 import { LangSwitcher } from "@/components/lang-switcher";
 
 type Point = { icon: string; title: string; body: string };
 
 function ModeCard({
-  mode,
+  href,
   kicker,
   title,
   blurb,
   icon,
-  badge,
   points,
   cta,
-  href,
   floatClass,
+  onHover,
 }: {
-  mode: "coach" | "academy";
+  href: string;
   kicker: string;
   title: string;
   blurb: string;
   icon: string;
-  badge?: string;
   points: Point[];
   cta: string;
-  href: string;
   floatClass: string;
+  onHover: () => void;
 }) {
   return (
     <Link
       href={href}
-      data-mode={mode}
       className={`rs-glass ${floatClass}`}
+      onMouseEnter={onHover}
       aria-label={cta}
     >
-      {badge && <div className="rs-badge">{badge}</div>}
       <div className="rs-ic">
         <Icon name={icon} />
       </div>
@@ -65,21 +64,39 @@ function ModeCard({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "modeSelect" });
+export default function Page() {
+  const locale = useLocale();
+  const t = useTranslations("modeSelect");
+  const [shimmerKey, setShimmerKey] = useState(0);
+
+  // Re-trigger the brand shimmer animation
+  function triggerShimmer() {
+    setShimmerKey((k) => k + 1);
+  }
+
+  // Touch the state once on mount to ensure animation runs cleanly
+  useEffect(() => {
+    // intentionally empty; CSS animation on first mount handles initial shimmer
+  }, []);
+
+  const heading = t("heading", { brand: "Rallytic" });
+  const headingParts = heading.split("Rallytic").flatMap((part, i, arr) =>
+    i < arr.length - 1
+      ? [part, <span className="wm" key={i}>Rallytic</span>]
+      : [part]
+  );
 
   return (
     <div id="rsel">
       <style>{RSEL_CSS}</style>
-      <div className="rs-brand">
-        <Brand size="lg" href={null} />
+
+      <div className="rs-brand" key={`brand-${shimmerKey}`}>
+        <span className="rtile">R</span>
+        <span className="txt">
+          allyt<span className="i">i</span>c
+        </span>
       </div>
+
       <div className="rs-signin">
         <LangSwitcher compact />
         <span>{t("alreadyAccount")}</span>
@@ -88,34 +105,23 @@ export default async function Page({
         </Link>
       </div>
 
-      <div className="rs-orb o1" />
-      <div className="rs-orb o2" />
-
       <div className="rs-stage">
         <header className="rs-head rs-enter">
           <div className="eyebrow">{t("eyebrow")}</div>
-          <h1>
-            {t("heading", { brand: "Rallytic" })
-              .split("Rallytic")
-              .flatMap((part, i, arr) =>
-                i < arr.length - 1
-                  ? [part, <span className="wm" key={i}>Rallytic</span>]
-                  : [part]
-              )}
-          </h1>
+          <h1>{headingParts}</h1>
           <p>{t("lede")}</p>
         </header>
 
         <div className="rs-world">
           <ModeCard
-            mode="coach"
+            href={`/${locale}/signup/coach`}
             kicker={t("coach.kicker")}
             title={t("coach.title")}
             blurb={t("coach.blurb")}
             icon="user-check"
-            href={`/${locale}/signup/coach`}
             cta={t("coach.cta")}
             floatClass="gCoach rs-enter"
+            onHover={triggerShimmer}
             points={[
               { icon: "users", title: t("coach.p1Title"), body: t("coach.p1Body") },
               { icon: "brain", title: t("coach.p2Title"), body: t("coach.p2Body") },
@@ -124,15 +130,14 @@ export default async function Page({
           />
 
           <ModeCard
-            mode="academy"
+            href={`/${locale}/signup/academy`}
             kicker={t("academy.kicker")}
             title={t("academy.title")}
             blurb={t("academy.blurb")}
             icon="building-bank"
-            badge={t("academy.badge")}
-            href={`/${locale}/signup/academy`}
             cta={t("academy.cta")}
             floatClass="gAcad rs-enter"
+            onHover={triggerShimmer}
             points={[
               { icon: "school", title: t("academy.p1Title"), body: t("academy.p1Body") },
               { icon: "chart-arcs", title: t("academy.p2Title"), body: t("academy.p2Body") },
@@ -152,20 +157,49 @@ const RSEL_CSS = `
   --glass:rgba(26,34,24,0.42);
   position:relative; height:100vh; overflow:hidden;
   perspective:1800px; perspective-origin:50% 46%;
-  background:
-    radial-gradient(40% 50% at 22% 20%, rgba(168,216,71,0.10), transparent 60%),
-    radial-gradient(40% 50% at 80% 82%, rgba(120,180,60,0.08), transparent 60%),
-    #080B08;
+  background:#080B08;
   color:var(--fg); -webkit-font-smoothing:antialiased;
 }
-#rsel .rs-orb{position:absolute;border-radius:50%;filter:blur(40px);pointer-events:none;opacity:.55}
-#rsel .rs-orb.o1{width:340px;height:340px;left:10%;top:14%;background:radial-gradient(circle,rgba(168,216,71,.5),transparent 65%);animation:rsDrift1 14s ease-in-out infinite}
-#rsel .rs-orb.o2{width:300px;height:300px;right:10%;bottom:10%;background:radial-gradient(circle,rgba(110,170,55,.45),transparent 65%);animation:rsDrift2 17s ease-in-out infinite}
-@keyframes rsDrift1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-40px)}}
-@keyframes rsDrift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,40px)}}
 
-#rsel .rs-brand{position:absolute;top:28px;left:38px;z-index:30;padding:4px 6px}
+#rsel .rs-brand{position:absolute;top:28px;left:38px;z-index:30;padding:4px 6px;display:flex;align-items:center;gap:2px;line-height:1}
 [dir="rtl"] #rsel .rs-brand{left:auto;right:38px}
+#rsel .rs-brand .rtile{
+  width:40px;height:40px;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#C4F062 0%,#8FBE2E 100%);
+  color:#0E1A00;font-weight:900;font-size:26px;letter-spacing:-.05em;line-height:1;
+  margin-right:-2px;
+  box-shadow:0 0 24px rgba(168,216,71,.30);
+  position:relative;overflow:hidden;
+}
+#rsel .rs-brand .rtile::after{
+  content:'';position:absolute;top:0;left:-150%;width:80%;height:100%;
+  background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.55) 50%,transparent 100%);
+  animation:rsBrandShine 1.6s ease-out;pointer-events:none;
+}
+#rsel .rs-brand .txt{
+  font-size:30px;font-weight:900;letter-spacing:-.045em;line-height:1;
+  background-image:linear-gradient(95deg,var(--fg) 0%,var(--fg) 40%,#ffffff 50%,var(--fg) 60%,var(--fg) 100%);
+  background-size:260% 100%;background-position:200% 0;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:rsBrandSweep 1.6s ease-out;
+}
+#rsel .rs-brand .txt .i{
+  background-image:linear-gradient(95deg,var(--acc) 0%,var(--acc) 40%,#ffffff 50%,var(--acc) 60%,var(--acc) 100%);
+  background-size:260% 100%;background-position:200% 0;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:rsBrandSweep 1.6s ease-out;
+}
+@keyframes rsBrandSweep{
+  from{background-position:200% 0}
+  to{background-position:-100% 0}
+}
+@keyframes rsBrandShine{
+  from{left:-150%}
+  to{left:200%}
+}
+
 #rsel .rs-signin{position:absolute;top:34px;right:42px;z-index:30;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--dim)}
 [dir="rtl"] #rsel .rs-signin{right:auto;left:42px}
 #rsel .rs-signin .rs-signin-link{color:var(--acc);font-weight:700;cursor:pointer;text-decoration:none}
@@ -186,24 +220,38 @@ const RSEL_CSS = `
   backdrop-filter:blur(16px) saturate(1.2); -webkit-backdrop-filter:blur(16px) saturate(1.2);
   display:flex;flex-direction:column;gap:12px;cursor:pointer;transform-style:preserve-3d;
   text-decoration:none;color:var(--fg);
-  box-shadow:0 40px 90px -34px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -30px 60px -30px rgba(168,216,71,.10);
+  box-shadow:0 40px 90px -34px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.10);
   transition:transform .6s cubic-bezier(.2,.8,.22,1), box-shadow .6s, border-color .6s;
   will-change:transform;
 }
+
+/* Green glow ONLY on hover — sits behind the card */
+#rsel .rs-glass::before{
+  content:'';
+  position:absolute;
+  inset:-70px;
+  border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(168,216,71,.45),transparent 65%);
+  filter:blur(50px);
+  opacity:0;
+  transition:opacity .55s ease;
+  pointer-events:none;
+  z-index:-1;
+}
+#rsel .rs-glass:hover::before{opacity:1}
+
 #rsel .rs-glass.gCoach{animation:rsFloatA 9s ease-in-out infinite}
 #rsel .rs-glass.gAcad {animation:rsFloatB 10s ease-in-out infinite}
 @keyframes rsFloatA{0%,100%{transform:translateY(0) rotateY(10deg) rotateX(3deg)}50%{transform:translateY(-16px) rotateY(4deg) rotateX(-2deg)}}
 @keyframes rsFloatB{0%,100%{transform:translateY(-8px) rotateY(-10deg) rotateX(3deg)}50%{transform:translateY(10px) rotateY(-4deg) rotateX(-2deg)}}
-#rsel .rs-glass::before{content:'';position:absolute;inset:0;border-radius:24px;pointer-events:none;
-  background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 38%);opacity:.7}
-#rsel .rs-glass::after{content:'';position:absolute;inset:0;border-radius:24px;pointer-events:none;
-  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.10) 50%,transparent 60%);
-  transform:translateX(-130%);transition:transform 1s ease}
-#rsel .rs-glass:hover{animation-play-state:paused;transform:translateY(-10px) rotateY(0deg) rotateX(0deg) translateZ(70px) scale(1.02);border-color:var(--accRing);box-shadow:0 60px 110px -36px rgba(168,216,71,.45),0 0 0 1px var(--accRing), inset 0 1px 0 rgba(255,255,255,.18)}
-#rsel .rs-glass:hover::after{transform:translateX(130%)}
 
-#rsel .rs-badge{position:absolute;top:14px;right:14px;padding:3px 9px;border-radius:4px;background:var(--acc);color:var(--accInk);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-[dir="rtl"] #rsel .rs-badge{right:auto;left:14px}
+#rsel .rs-glass:hover{
+  animation-play-state:paused;
+  transform:translateY(-10px) rotateY(0deg) rotateX(0deg) translateZ(70px) scale(1.02);
+  border-color:var(--accRing);
+  box-shadow:0 60px 110px -36px rgba(168,216,71,.45),0 0 0 1px var(--accRing), inset 0 1px 0 rgba(255,255,255,.18);
+}
+
 #rsel .rs-ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:24px;color:var(--acc);background:linear-gradient(135deg,rgba(168,216,71,.20),rgba(168,216,71,.04));border:1px solid rgba(168,216,71,.30);transform:translateZ(60px);box-shadow:0 10px 24px -10px rgba(168,216,71,.5);margin-bottom:4px}
 #rsel .rs-ttl{transform:translateZ(40px)}
 #rsel .rs-ttl .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);font-weight:700;margin-bottom:4px}
