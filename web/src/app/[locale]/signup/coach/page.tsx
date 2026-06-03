@@ -115,7 +115,7 @@ export default function CoachSignUpPage() {
         <div className="line" />
       </div>
 
-      <SocialButtons />
+      <SocialButtons onProvider={() => router.push(`/${locale}/coach`)} />
 
       <div className="auth-foot">
         {t("auth.signupCoach.footer")}

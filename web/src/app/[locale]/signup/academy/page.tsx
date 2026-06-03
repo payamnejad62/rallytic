@@ -105,7 +105,7 @@ export default function AcademySignUpPage() {
         <div className="line" />
       </div>
 
-      <SocialButtons />
+      <SocialButtons onProvider={() => router.push(`/${locale}/academy`)} />
 
       <div className="auth-foot">
         {t("auth.signupAcademy.footer")}

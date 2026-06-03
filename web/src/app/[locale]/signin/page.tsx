@@ -113,7 +113,9 @@ export default function SignInPage() {
         <div className="line" />
       </div>
 
-      <SocialButtons />
+      <SocialButtons
+        onProvider={() => router.push(`/${locale}/${mode}`)}
+      />
 
       <div className="auth-foot">
         {t("auth.signin.footer")}
