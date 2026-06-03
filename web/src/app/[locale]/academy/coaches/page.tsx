@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Topbar, GhostBtn, PrimaryBtn } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { COACHES } from "@/lib/academy-data";
+import { InviteCoachModal } from "@/components/invite-offboard-modals";
 
 function Styles() {
   return (
@@ -56,6 +57,7 @@ export default function CoachesRosterPage() {
   const t = useTranslations();
   const locale = useLocale();
   const [sort, setSort] = useState("Score");
+  const [showInvite, setShowInvite] = useState(false);
 
   const sorted = useMemo(() => {
     const arr = [...COACHES];
@@ -79,7 +81,7 @@ export default function CoachesRosterPage() {
           <>
             <GhostBtn icon="adjustments-horizontal">{t("common.filters")}</GhostBtn>
             <GhostBtn icon="file-export">{t("common.export")}</GhostBtn>
-            <PrimaryBtn icon="user-plus">{t("coaches.inviteCoach")}</PrimaryBtn>
+            <PrimaryBtn icon="user-plus" onClick={() => setShowInvite(true)}>{t("coaches.inviteCoach")}</PrimaryBtn>
           </>
         }
       />
@@ -211,6 +213,7 @@ export default function CoachesRosterPage() {
           ))}
         </div>
       </div>
+      {showInvite && <InviteCoachModal onClose={() => setShowInvite(false)} currentCoaches={COACHES.length} />}
     </>
   );
 }

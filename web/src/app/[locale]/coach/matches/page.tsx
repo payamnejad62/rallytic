@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Topbar, GhostBtn, PrimaryBtn } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { MATCHES, MATCH_STATS } from "@/lib/match-data";
+import { TOURNAMENT } from "@/lib/coach-extra-data";
+import { useLocaleFormat } from "@/lib/use-locale-format";
 
 function Styles() {
   return (
@@ -81,7 +83,9 @@ const TONE_FG: Record<string, string> = {
 
 export default function MatchesPage() {
   const t = useTranslations();
+  const fmt = useLocaleFormat();
   const [tab, setTab] = useState<"matches" | "tournament">("matches");
+  const [tourTab, setTourTab] = useState<"ladder" | "bracket">("ladder");
   const [selId, setSelId] = useState(MATCHES[0].id);
   const sel = MATCHES.find((m) => m.id === selId)!;
 
@@ -294,18 +298,160 @@ export default function MatchesPage() {
         )}
 
         {tab === "tournament" && (
-          <div
-            className="r-card"
-            style={{ marginTop: 14, padding: "48px 24px", textAlign: "center", color: "var(--fgDim)" }}
-          >
-            <Icon name="tournament" style={{ fontSize: 36, color: "var(--accent)" }} />
-            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 700, color: "var(--fg)" }}>
-              Tournament ladder / bracket
+          <>
+            <style>{`
+.tn-hero{margin-top:14px;background:var(--surface2);border:1px solid var(--hairline);border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.tn-tile{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#1d2a1d,#2a3a2a);border:1px solid var(--accentRing);display:grid;place-items:center;color:var(--accent);font-weight:900;font-size:18px}
+.tn-h-t{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--fgMute);font-weight:700}
+.tn-h-name{font-size:16px;font-weight:800;margin-top:2px}
+.tn-h-sub{font-size:11.5px;color:var(--fgDim);margin-top:2px}
+.tn-h-prog-k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--fgMute);font-weight:700;text-align:right}
+.tn-h-prog-v{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--accent);text-align:right;margin-top:2px}
+.tn-h-prog-bar{margin-top:6px;width:120px;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.tn-h-prog-fill{height:100%;background:var(--accent);width:${(TOURNAMENT.progress.played/TOURNAMENT.progress.total)*100}%}
+
+.tn-sub{margin-top:14px;display:flex;justify-content:space-between;align-items:center}
+.tn-rules{display:flex;gap:14px;font-size:10.5px;letter-spacing:.14em;color:var(--fgMute);font-weight:700;text-transform:uppercase}
+.tn-rules .win{color:var(--accent)}
+.tn-rules .loss{color:var(--weak)}
+
+.tn-ladder{margin-top:14px;background:var(--surface2);border:1px solid var(--hairline);border-radius:14px;overflow:hidden}
+.tn-th{padding:14px 18px;display:grid;grid-template-columns:50px 60px 1fr 80px 60px 60px 90px 80px;gap:14px;background:linear-gradient(180deg,#0c100c,#0a0d0a);border-bottom:1px solid var(--hairline);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--fgMute);font-weight:700;align-items:center}
+.tn-th .updated{font-family:'JetBrains Mono',monospace;color:var(--fgDim)}
+.tn-row{padding:14px 18px;display:grid;grid-template-columns:50px 60px 1fr 80px 60px 60px 90px 80px;gap:14px;align-items:center;border-bottom:1px solid var(--hairline);font-size:13px}
+.tn-row:last-child{border-bottom:none}
+.tn-row.first{background:linear-gradient(90deg,rgba(168,216,71,0.10),transparent 50%)}
+.tn-rank{width:28px;height:28px;border-radius:14px;background:var(--surface3);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--fgDim);text-align:center;justify-self:center}
+.tn-row.first .tn-rank{background:var(--accent);color:var(--accentInk)}
+.tn-flag{font-size:18px;text-align:center}
+.tn-name{font-weight:700}
+.tn-num{font-family:'JetBrains Mono',monospace;font-weight:700}
+.tn-w{color:var(--good)}
+.tn-l{color:var(--weak)}
+.tn-rate-bar{width:60px;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}
+.tn-rate-fill{height:100%;background:var(--accent)}
+.tn-points{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--accent);font-size:14px}
+
+.tn-bracket{margin-top:14px;background:var(--surface2);border:1px solid var(--hairline);border-radius:14px;padding:24px}
+.tn-bracket-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px;align-items:center}
+.tn-bracket-h{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fgMute);font-weight:700;text-align:center;margin-bottom:12px}
+.tn-match{background:var(--surface3);border:1px solid var(--hairline2);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.tn-match.played{border-color:var(--accentRing);background:linear-gradient(90deg,rgba(168,216,71,0.04),transparent)}
+.tn-match-row{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0}
+.tn-match-row.winner{font-weight:700;color:var(--fg)}
+.tn-match-row.loser{color:var(--fgMute)}
+.tn-match-score{font-family:'JetBrains Mono',monospace;font-weight:700}
+.tn-match.played .tn-match-row.winner .tn-match-score{color:var(--accent)}
+`}</style>
+            <div className="tn-hero">
+              <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+                <div className="tn-tile"><Icon name="trophy" /></div>
+                <div>
+                  <div className="tn-h-t">{t("matches.tabTournament").toUpperCase()}</div>
+                  <div className="tn-h-name">{TOURNAMENT.name}</div>
+                  <div className="tn-h-sub">{TOURNAMENT.type} · {TOURNAMENT.dates} · {fmt.d(TOURNAMENT.players)} players</div>
+                </div>
+              </div>
+              <div>
+                <div className="tn-h-prog-k">{t("tournament.progress")}</div>
+                <div className="tn-h-prog-v">{fmt.d(TOURNAMENT.progress.played)}/{fmt.d(TOURNAMENT.progress.total)} {t("tournament.matchesShort")}</div>
+                <div className="tn-h-prog-bar"><div className="tn-h-prog-fill" /></div>
+              </div>
             </div>
-            <div style={{ marginTop: 6, fontSize: 13 }}>
-              Standings, ladder, and bracket views appear here when a tournament is active.
+
+            <div className="tn-sub">
+              <div className="r-tabs">
+                <button className={"r-tab " + (tourTab === "ladder" ? "on" : "")} onClick={() => setTourTab("ladder")}>
+                  <Icon name="list-numbers" /> {t("tournament.tabLadder")}
+                </button>
+                <button className={"r-tab " + (tourTab === "bracket" ? "on" : "")} onClick={() => setTourTab("bracket")}>
+                  <Icon name="binary-tree" /> {t("tournament.tabBracket")}
+                </button>
+              </div>
+              <div className="tn-rules">
+                <span className="win">{t("tournament.winPts", { n: fmt.d(TOURNAMENT.pointsRule.win) })}</span>
+                <span className="loss">{t("tournament.lossPts", { n: fmt.d(TOURNAMENT.pointsRule.loss) })}</span>
+              </div>
             </div>
-          </div>
+
+            {tourTab === "ladder" && (
+              <div className="tn-ladder">
+                <div className="tn-th">
+                  <span>{t("tournament.standings")}</span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span className="updated">{t("tournament.updatedAgo", { n: fmt.d(2) })}</span>
+                </div>
+                <div className="tn-th">
+                  <span>{t("tournament.th.rank")}</span>
+                  <span></span>
+                  <span>{t("tournament.th.player")}</span>
+                  <span>{t("tournament.th.played")}</span>
+                  <span>{t("tournament.th.w")}</span>
+                  <span>{t("tournament.th.l")}</span>
+                  <span>{t("tournament.th.winRate")}</span>
+                  <span>{t("tournament.th.points")}</span>
+                </div>
+                {TOURNAMENT.ladder.map((p, i) => (
+                  <div key={p.name} className={"tn-row" + (i === 0 ? " first" : "")}>
+                    <span className="tn-rank">{fmt.d(p.rank)}</span>
+                    <span className="tn-flag">{p.flag}</span>
+                    <span className="tn-name">{p.name}</span>
+                    <span className="tn-num">{fmt.d(p.played)}</span>
+                    <span className="tn-num tn-w">{fmt.d(p.w)}</span>
+                    <span className="tn-num tn-l">{fmt.d(p.l)}</span>
+                    <span>
+                      <span className="tn-rate-bar"><span className="tn-rate-fill" style={{ width: `${p.winRate}%`, display: "block" }} /></span>
+                      <span className="tn-num">{fmt.d(p.winRate)}%</span>
+                    </span>
+                    <span className="tn-points">{fmt.d(p.points)} PTS</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {tourTab === "bracket" && (
+              <div className="tn-bracket">
+                <div className="tn-bracket-grid">
+                  <div>
+                    <div className="tn-bracket-h">{t("tournament.qf")}</div>
+                    {TOURNAMENT.bracket.qf.map((m, i) => (
+                      <div key={i} className={"tn-match" + (m.aScore !== null ? " played" : "")}>
+                        <div className={"tn-match-row " + (m.aScore !== null && m.aScore! > m.bScore! ? "winner" : "loser")}>
+                          <span>{m.a}</span>
+                          <span className="tn-match-score">{m.aScore !== null ? fmt.d(m.aScore) : "—"}</span>
+                        </div>
+                        <div className={"tn-match-row " + (m.aScore !== null && m.bScore! > m.aScore! ? "winner" : "loser")}>
+                          <span>{m.b}</span>
+                          <span className="tn-match-score">{m.bScore !== null ? fmt.d(m.bScore) : "—"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="tn-bracket-h">{t("tournament.sf")}</div>
+                    {TOURNAMENT.bracket.sf.map((m, i) => (
+                      <div key={i} className="tn-match">
+                        <div className="tn-match-row loser"><span>{m.a}</span><span className="tn-match-score">—</span></div>
+                        <div className="tn-match-row loser"><span>{m.b}</span><span className="tn-match-score">—</span></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <div className="tn-bracket-h">{t("tournament.final")}</div>
+                    <div className="tn-match" style={{ borderColor: "var(--accent)" }}>
+                      <div className="tn-match-row"><span>{t("tournament.tbd")}</span><span className="tn-match-score">—</span></div>
+                      <div className="tn-match-row"><span>{t("tournament.tbd")}</span><span className="tn-match-score">—</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

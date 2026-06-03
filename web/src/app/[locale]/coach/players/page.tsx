@@ -7,6 +7,7 @@ import { Topbar, GhostBtn, PrimaryBtn } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { ROSTER, type RosterPlayer } from "@/lib/coach-data";
 import { useLocaleFormat } from "@/lib/use-locale-format";
+import { DeletePlayerModal } from "@/components/delete-player-modal";
 
 const LEVELS: ("All" | RosterPlayer["level"])[] = [
   "All",
@@ -91,6 +92,7 @@ export default function PlayersRosterPage() {
   const [q, setQ] = useState("");
   const [level, setLevel] = useState<(typeof LEVELS)[number]>("All");
   const [page, setPage] = useState(1);
+  const [deleting, setDeleting] = useState<RosterPlayer | null>(null);
 
   const filtered = useMemo(() => {
     let out = ROSTER;
@@ -118,7 +120,7 @@ export default function PlayersRosterPage() {
           <>
             <GhostBtn icon="adjustments-horizontal">{t("common.filters")}</GhostBtn>
             <GhostBtn icon="file-spreadsheet">{t("common.exportCsv")}</GhostBtn>
-            <Link href={`/${locale}/coach`} style={{ textDecoration: "none" }}>
+            <Link href={`/${locale}/coach/add-player`} style={{ textDecoration: "none" }}>
               <PrimaryBtn icon="user-plus">{t("players.newPlayer")}</PrimaryBtn>
             </Link>
           </>
@@ -238,7 +240,7 @@ export default function PlayersRosterPage() {
               p.trend > 0 ? "up" : p.trend < 0 ? "dn" : "flat";
             return (
               <div className="rst-tr" key={p.id}>
-                <div className="rst-num">{p.num}</div>
+                <div className="rst-num">{fmt.d(p.num)}</div>
                 <div className="rst-player">
                   <div className="rst-av">{p.initials}</div>
                   <div>
@@ -246,7 +248,7 @@ export default function PlayersRosterPage() {
                       {p.flag} {p.name}
                     </div>
                     <div className="rst-sub">
-                      age {p.age} · {p.focus}
+                      {t("common.age")} {fmt.d(p.age)} · {p.focus}
                     </div>
                   </div>
                 </div>
@@ -255,24 +257,42 @@ export default function PlayersRosterPage() {
                     className="rst-pill"
                     style={{ background: TONE_BG[tone], color: TONE_FG[tone] }}
                   >
-                    {p.level}
+                    {t(`levels.${p.level}`)}
                   </span>
                 </div>
-                <div className="rst-itn">ITN {p.itn}</div>
+                <div className="rst-itn">ITN {fmt.d(p.itn)}</div>
                 <div className="rst-matches">
-                  {p.matches} <em>·</em> {p.winRate}%
+                  {fmt.d(p.matches)} <em>·</em> {fmt.d(p.winRate)}%
                 </div>
                 <div className={"rst-trend " + trendCls}>
                   {p.trend > 0 ? "↑" : p.trend < 0 ? "↓" : "→"}{" "}
-                  {Math.abs(p.trend).toFixed(1)}
+                  {fmt.d(Math.abs(p.trend).toFixed(1))}
                 </div>
-                <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span
                     className="rst-pill"
                     style={{ background: statusTone.bg, color: statusTone.fg }}
                   >
                     {p.status}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setDeleting(p)}
+                    aria-label="Delete"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 8,
+                      background: "transparent",
+                      border: "1px solid var(--hairline2)",
+                      color: "var(--fgMute)",
+                      cursor: "pointer",
+                      display: "grid",
+                      placeItems: "center",
+                    }}
+                  >
+                    <Icon name="trash" />
+                  </button>
                 </div>
               </div>
             );
@@ -298,6 +318,13 @@ export default function PlayersRosterPage() {
           </div>
         </div>
       </div>
+      {deleting && (
+        <DeletePlayerModal
+          name={deleting.name}
+          onClose={() => setDeleting(null)}
+          onConfirm={() => setDeleting(null)}
+        />
+      )}
     </>
   );
 }

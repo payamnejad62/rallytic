@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Topbar, GhostBtn, PrimaryBtn } from "@/components/shell";
 import { Icon } from "@/components/icon";
 import { TrendLine, Donut } from "@/components/trend-line";
-import { ACAD_FINANCE, ACAD_TRENDS } from "@/lib/academy-data";
+import { ACAD_FINANCE, ACAD_TRENDS, COACHES } from "@/lib/academy-data";
+import { ACAD_LEDGER, ACAD_PAYROLL, ACAD_PAYMENTS_RECENT } from "@/lib/academy-extra-data";
 
 const TABS = ["overview", "revPerCoach", "ledger", "payroll", "payments"] as const;
 type AFTab = (typeof TABS)[number];
@@ -218,20 +219,250 @@ export default function AcademyFinancePage() {
           </>
         )}
 
-        {tab !== "overview" && (
-          <div
-            className="r-card"
-            style={{ padding: "40px 24px", textAlign: "center", color: "var(--fgDim)" }}
-          >
-            <Icon name="report-money" style={{ fontSize: 32, color: "var(--accent)" }} />
-            <div style={{ marginTop: 10, fontWeight: 700, color: "var(--fg)", fontSize: 16 }}>
-              {t(`afinance.tabs.${tab}`)}
-            </div>
-            <div style={{ marginTop: 4, fontSize: 13 }}>
-              {t("afinance.soonNote", { tab: t(`afinance.tabs.${tab}`).toLowerCase() })}
-            </div>
+        {tab === "ledger" && <LedgerView />}
+        {tab === "payroll" && <PayrollView />}
+        {tab === "revPerCoach" && <RevPerCoachView />}
+        {tab === "payments" && <PaymentsView />}
+      </div>
+    </>
+  );
+}
+
+
+const T_TONE_FG: Record<string, string> = {
+  paid: "#A8D847",
+  pending: "#F2B544",
+  overdue: "#E5685D",
+  verifying: "#7DD3FC",
+};
+
+function SubStyles() {
+  return (
+    <style>{`
+.afs-card{margin-top:14px;background:var(--surface2);border:1px solid var(--hairline);border-radius:14px;overflow:hidden}
+.afs-card-h{padding:14px 18px;border-bottom:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:center}
+.afs-card-t{font-size:13px;font-weight:800}
+.afs-card-s{font-size:11.5px;color:var(--fgMute);margin-top:2px}
+.afs-row{padding:13px 18px;border-bottom:1px solid var(--hairline);align-items:center;font-size:13px;display:grid;gap:14px}
+.afs-row:last-child{border-bottom:none}
+.afs-head{padding:12px 18px;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fgMute);font-weight:700;background:linear-gradient(180deg,#0c100c,#0a0d0a);border-bottom:1px solid var(--hairline);display:grid;gap:14px;align-items:center}
+.afs-money{font-family:'JetBrains Mono',monospace;font-weight:700}
+.afs-money.income{color:var(--good)}
+.afs-money.expense{color:var(--weak)}
+.afs-pill{display:inline-block;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.afs-av{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#1d2a1d,#2a3a2a);border:1px solid var(--accentRing);display:grid;place-items:center;color:var(--accent);font-weight:700;font-size:11px}
+.afs-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.afs-bar-fill{height:100%;border-radius:3px;background:var(--accent)}
+.afs-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.afs-total{background:var(--surface2);border:1px solid var(--hairline);border-radius:14px;padding:14px 18px}
+.afs-total-k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--fgMute);font-weight:700}
+.afs-total-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+`}</style>
+  );
+}
+
+function LedgerView() {
+  const t = useTranslations();
+  const income = ACAD_LEDGER.filter((l) => l.type === "income").reduce((a, b) => a + b.amt, 0);
+  const expense = ACAD_LEDGER.filter((l) => l.type === "expense").reduce((a, b) => a + b.amt, 0);
+  const net = income - expense;
+  return (
+    <>
+      <SubStyles />
+      <div className="afs-totals">
+        <div className="afs-total">
+          <div className="afs-total-k">{t("ledger.incomeTotal")}</div>
+          <div className="afs-total-v" style={{ color: "var(--good)" }}>${income.toLocaleString()}</div>
+        </div>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("ledger.expenseTotal")}</div>
+          <div className="afs-total-v" style={{ color: "var(--weak)" }}>${expense.toLocaleString()}</div>
+        </div>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("ledger.netMay")}</div>
+          <div className="afs-total-v" style={{ color: "var(--accent)" }}>${net.toLocaleString()}</div>
+        </div>
+      </div>
+      <div className="afs-card">
+        <div className="afs-card-h">
+          <div>
+            <div className="afs-card-t">{t("ledger.title")}</div>
+            <div className="afs-card-s">{t("ledger.subtitle")}</div>
           </div>
-        )}
+          <PrimaryBtn icon="plus">{t("ledger.addEntry")}</PrimaryBtn>
+        </div>
+        <div className="afs-head" style={{ gridTemplateColumns: "70px 100px 1.2fr 2fr 1fr 110px 80px" }}>
+          <span>{t("ledger.th.date")}</span>
+          <span>{t("ledger.th.type")}</span>
+          <span>{t("ledger.th.category")}</span>
+          <span>{t("ledger.th.description")}</span>
+          <span>{t("ledger.th.method")}</span>
+          <span>{t("ledger.th.amount")}</span>
+          <span>{t("ledger.th.source")}</span>
+        </div>
+        {ACAD_LEDGER.map((l) => (
+          <div key={l.id} className="afs-row" style={{ gridTemplateColumns: "70px 100px 1.2fr 2fr 1fr 110px 80px" }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{l.date}</span>
+            <span className="afs-pill" style={{ background: l.type === "income" ? "rgba(168,216,71,0.10)" : "rgba(229,104,93,0.10)", color: l.type === "income" ? "#A8D847" : "#E5685D" }}>
+              {t(`ledger.${l.type}`)}
+            </span>
+            <span style={{ fontWeight: 600 }}>{l.cat}</span>
+            <span style={{ color: "var(--fgDim)", fontSize: 12 }}>{l.desc}</span>
+            <span style={{ fontSize: 12, color: "var(--fgMute)" }}>{l.method}</span>
+            <span className={"afs-money " + l.type}>{l.type === "income" ? "+" : "−"}${l.amt.toLocaleString()}</span>
+            <span className="afs-pill" style={{ background: "var(--surface3)", color: l.source === "auto" ? "#7DD3FC" : "var(--fgMute)", fontSize: 9 }}>
+              {l.source === "auto" ? t("ledger.auto") : t("ledger.manual")}
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function PayrollView() {
+  const t = useTranslations();
+  const total = ACAD_PAYROLL.reduce((a, b) => a + b.payroll, 0);
+  return (
+    <>
+      <SubStyles />
+      <div className="afs-card">
+        <div className="afs-card-h">
+          <div>
+            <div className="afs-card-t">{t("payroll.title")}</div>
+            <div className="afs-card-s">{t("payroll.total")}: <span style={{ color: "var(--accent)", fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>${total.toLocaleString()}</span></div>
+          </div>
+          <PrimaryBtn icon="file-export">{t("payroll.exportPayslips")}</PrimaryBtn>
+        </div>
+        <div className="afs-head" style={{ gridTemplateColumns: "40px 1.5fr 0.7fr 1fr 1fr 1.4fr 1fr 0.8fr" }}>
+          <span></span>
+          <span>{t("payroll.th.coach")}</span>
+          <span>{t("payroll.th.players")}</span>
+          <span>{t("payroll.th.monthlyRev")}</span>
+          <span>{t("payroll.th.payroll")}</span>
+          <span>{t("payroll.th.model")}</span>
+          <span>{t("payroll.th.next")}</span>
+          <span>{t("payroll.th.status")}</span>
+        </div>
+        {ACAD_PAYROLL.map((p) => (
+          <div key={p.id} className="afs-row" style={{ gridTemplateColumns: "40px 1.5fr 0.7fr 1fr 1fr 1.4fr 1fr 0.8fr" }}>
+            <div className="afs-av">{p.initials}</div>
+            <span style={{ fontWeight: 700 }}>{p.name}</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{p.players}</span>
+            <span className="afs-money income">${p.monthlyRev.toLocaleString()}</span>
+            <span className="afs-money" style={{ color: "var(--fg)" }}>${p.payroll.toLocaleString()}</span>
+            <span style={{ fontSize: 11.5, color: "var(--fgDim)" }}>{p.model}</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{p.nextPaid}</span>
+            <span className="afs-pill" style={{ background: p.status === "on track" ? "rgba(168,216,71,0.10)" : "rgba(242,181,68,0.10)", color: p.status === "on track" ? "#A8D847" : "#F2B544" }}>
+              {p.status === "on track" ? t("payroll.onTrack") : t("payroll.review")}
+            </span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function RevPerCoachView() {
+  const t = useTranslations();
+  const totalRev = ACAD_PAYROLL.reduce((a, b) => a + b.monthlyRev, 0);
+  return (
+    <>
+      <SubStyles />
+      <div className="afs-card">
+        <div className="afs-card-h">
+          <div>
+            <div className="afs-card-t">{t("revPerCoach.title")}</div>
+            <div className="afs-card-s">{t("revPerCoach.subtitle")}</div>
+          </div>
+        </div>
+        <div className="afs-head" style={{ gridTemplateColumns: "40px 1.5fr 0.7fr 0.9fr 1fr 1.6fr" }}>
+          <span></span>
+          <span>{t("revPerCoach.th.coach")}</span>
+          <span>{t("revPerCoach.th.players")}</span>
+          <span>{t("revPerCoach.th.avgPerPlayer")}</span>
+          <span>{t("revPerCoach.th.monthly")}</span>
+          <span>{t("revPerCoach.th.share")}</span>
+        </div>
+        {ACAD_PAYROLL.map((p) => {
+          const avg = Math.round(p.monthlyRev / p.players);
+          const sharePct = Math.round((p.monthlyRev / totalRev) * 100);
+          return (
+            <div key={p.id} className="afs-row" style={{ gridTemplateColumns: "40px 1.5fr 0.7fr 0.9fr 1fr 1.6fr" }}>
+              <div className="afs-av">{p.initials}</div>
+              <span style={{ fontWeight: 700 }}>{p.name}</span>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{p.players}</span>
+              <span className="afs-money" style={{ color: "var(--fg)" }}>${avg}</span>
+              <span className="afs-money income">${p.monthlyRev.toLocaleString()}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="afs-bar" style={{ flex: 1 }}>
+                  <span className="afs-bar-fill" style={{ width: `${sharePct}%`, display: "block" }} />
+                </span>
+                <span className="afs-money" style={{ color: "var(--accent)", minWidth: 40, textAlign: "right" }}>{sharePct}%</span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+function PaymentsView() {
+  const t = useTranslations();
+  const paid = ACAD_PAYMENTS_RECENT.filter((p) => p.status === "paid");
+  const pending = ACAD_PAYMENTS_RECENT.filter((p) => p.status === "pending");
+  const overdue = ACAD_PAYMENTS_RECENT.filter((p) => p.status === "overdue");
+  return (
+    <>
+      <SubStyles />
+      <div className="afs-totals" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("payments.kpis.paid")}</div>
+          <div className="afs-total-v" style={{ color: "var(--good)" }}>{paid.length}</div>
+        </div>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("payments.kpis.pending")}</div>
+          <div className="afs-total-v" style={{ color: "var(--med)" }}>{pending.length}</div>
+        </div>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("payments.kpis.overdue")}</div>
+          <div className="afs-total-v" style={{ color: "var(--weak)" }}>{overdue.length}</div>
+        </div>
+        <div className="afs-total">
+          <div className="afs-total-k">{t("payments.kpis.upcoming")}</div>
+          <div className="afs-total-v" style={{ color: "var(--fg)" }}>${(overdue.reduce((a, b) => a + b.amt, 0)).toLocaleString()}</div>
+        </div>
+      </div>
+      <div className="afs-card">
+        <div className="afs-card-h">
+          <div>
+            <div className="afs-card-t">{t("payments.title")}</div>
+            <div className="afs-card-s">{t("payments.subtitle")}</div>
+          </div>
+          <button className="r-btn" style={{ background: "var(--weak)", color: "#fff", padding: "7px 14px", border: "none", fontWeight: 700 }}>
+            <Icon name="bell" /> {t("payments.remindOverdue")}
+          </button>
+        </div>
+        <div className="afs-head" style={{ gridTemplateColumns: "1.2fr 1.2fr 0.9fr 0.8fr 0.8fr" }}>
+          <span>{t("payments.th.payer")}</span>
+          <span>{t("payments.th.player")}</span>
+          <span>{t("payments.th.amount")}</span>
+          <span>{t("payments.th.date")}</span>
+          <span>{t("payments.th.status")}</span>
+        </div>
+        {ACAD_PAYMENTS_RECENT.map((p) => (
+          <div key={p.id} className="afs-row" style={{ gridTemplateColumns: "1.2fr 1.2fr 0.9fr 0.8fr 0.8fr" }}>
+            <span style={{ fontWeight: 700 }}>{p.payer}</span>
+            <span style={{ color: "var(--fgDim)" }}>{p.player}</span>
+            <span className="afs-money income">${p.amt}</span>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{p.date}</span>
+            <span className="afs-pill" style={{ background: `${T_TONE_FG[p.status]}1A`, color: T_TONE_FG[p.status] }}>
+              {p.status}
+              {p.status === "overdue" && p.daysOverdue && ` · ${p.daysOverdue}d`}
+            </span>
+          </div>
+        ))}
       </div>
     </>
   );
