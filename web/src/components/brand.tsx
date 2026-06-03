@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 export function Brand({
   size = "md",
@@ -7,6 +10,7 @@ export function Brand({
   size?: "md" | "lg";
   href?: string | null;
 }) {
+  const locale = useLocale();
   const cls = size === "lg" ? "r-brand r-brand-lg" : "r-brand";
   const inner = (
     <>
@@ -19,8 +23,9 @@ export function Brand({
   if (href === null) {
     return <div className={cls}>{inner}</div>;
   }
+  const target = href.startsWith("/") ? `/${locale}${href === "/" ? "" : href}` : href;
   return (
-    <Link href={href} className={cls}>
+    <Link href={target} className={cls}>
       {inner}
     </Link>
   );

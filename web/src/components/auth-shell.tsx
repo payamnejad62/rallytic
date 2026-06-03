@@ -1,27 +1,35 @@
+"use client";
+
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Brand } from "@/components/brand";
 import { Icon } from "@/components/icon";
+import { LangSwitcher } from "@/components/lang-switcher";
 
 type Stat = { v: string; k: string };
 
-const DEFAULT_FEATURES = [
-  "Player profiles with skill assessments",
-  "Match analytics & opponent scouting",
-  "AI-assisted training plans",
-];
-
-const DEFAULT_STATS: Stat[] = [
-  { v: "500+", k: "Coaches" },
-  { v: "12K+", k: "Players" },
-  { v: "98%", k: "Renewal" },
-];
+// Replaces <em>...</em> in a translated string with <em> JSX nodes.
+export function RichHeadline({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  const re = /<em>(.*?)<\/em>/g;
+  let lastIdx = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > lastIdx) parts.push(text.slice(lastIdx, m.index));
+    parts.push(<em key={i++}>{m[1]}</em>);
+    lastIdx = m.index + m[0].length;
+  }
+  if (lastIdx < text.length) parts.push(text.slice(lastIdx));
+  return <>{parts}</>;
+}
 
 export function AuthShell({
   eyebrow,
   headline,
   blurb,
-  features = DEFAULT_FEATURES,
-  stats = DEFAULT_STATS,
+  features,
+  stats,
   children,
 }: {
   eyebrow: string;
@@ -31,9 +39,31 @@ export function AuthShell({
   stats?: Stat[];
   children: ReactNode;
 }) {
+  const t = useTranslations();
+  const finalFeatures = features ?? [
+    t("auth.features.f1"),
+    t("auth.features.f2"),
+    t("auth.features.f3"),
+  ];
+  const finalStats = stats ?? [
+    { v: "500+", k: t("auth.stats.coaches") },
+    { v: "12K+", k: t("auth.stats.playersStat") },
+    { v: "98%", k: t("auth.stats.renewal") },
+  ];
+
   return (
     <div className="auth-page">
       <style>{AUTH_CSS}</style>
+      <div
+        style={{
+          position: "absolute",
+          top: 20,
+          insetInlineEnd: 24,
+          zIndex: 20,
+        }}
+      >
+        <LangSwitcher compact />
+      </div>
       <div className="auth-shell">
         <aside className="auth-hero">
           <div className="auth-art" aria-hidden>
@@ -49,7 +79,7 @@ export function AuthShell({
             <h1 className="auth-headline">{headline}</h1>
             <p className="auth-blurb">{blurb}</p>
             <div className="auth-features">
-              {features.map((f) => (
+              {finalFeatures.map((f) => (
                 <div className="auth-feat" key={f}>
                   <span className="auth-feat-tick">
                     <Icon name="check" />
@@ -62,7 +92,7 @@ export function AuthShell({
 
           <div className="auth-hero-bot">
             <div className="auth-stats">
-              {stats.map((s, i) => (
+              {finalStats.map((s, i) => (
                 <div className="auth-stat" key={s.k} data-i={i}>
                   <div className="auth-stat-v mono">{s.v}</div>
                   <div className="auth-stat-k">{s.k}</div>
@@ -70,13 +100,13 @@ export function AuthShell({
               ))}
             </div>
             <div className="auth-legal">
-              <div>© 2026 rallytic · by Payam Nejad</div>
+              <div>{t("auth.legal.copy")}</div>
               <div className="auth-legal-right">
-                <span>Privacy</span>
-                <span>Terms</span>
+                <span>{t("auth.legal.privacy")}</span>
+                <span>{t("auth.legal.terms")}</span>
                 <span className="auth-status">
                   <span className="dot" />
-                  All systems normal
+                  {t("auth.legal.status")}
                 </span>
               </div>
             </div>
