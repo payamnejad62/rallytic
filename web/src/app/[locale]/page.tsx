@@ -64,25 +64,57 @@ function ModeCard({
   );
 }
 
+// The wordmark "Rallytic" with each letter as a separate span so a
+// staggered wave animation can run from R → c.
+function BrandWave() {
+  // R lives inside the tile; "allytic" letters with i highlighted
+  const tail = ["a", "l", "l", "y", "t", "i", "c"];
+  return (
+    <div className="rs-brand">
+      <span className="rtile rs-letter" style={{ animationDelay: "0ms" }}>
+        R
+      </span>
+      <span className="txt">
+        {tail.map((c, i) => {
+          const isI = c === "i";
+          return (
+            <span
+              key={i}
+              className={"rs-letter" + (isI ? " i" : "")}
+              style={{ animationDelay: `${(i + 1) * 80}ms` }}
+            >
+              {c}
+            </span>
+          );
+        })}
+      </span>
+    </div>
+  );
+}
+
 export default function Page() {
   const locale = useLocale();
   const t = useTranslations("modeSelect");
-  const [shimmerKey, setShimmerKey] = useState(0);
+  const [waveKey, setWaveKey] = useState(0);
 
-  // Re-trigger the brand shimmer animation
-  function triggerShimmer() {
-    setShimmerKey((k) => k + 1);
+  // Re-trigger brand wave by remounting the brand sub-tree
+  function triggerWave() {
+    setWaveKey((k) => k + 1);
   }
 
-  // Touch the state once on mount to ensure animation runs cleanly
   useEffect(() => {
-    // intentionally empty; CSS animation on first mount handles initial shimmer
+    // CSS animation runs on first mount automatically
   }, []);
 
   const heading = t("heading", { brand: "Rallytic" });
   const headingParts = heading.split("Rallytic").flatMap((part, i, arr) =>
     i < arr.length - 1
-      ? [part, <span className="wm" key={i}>Rallytic</span>]
+      ? [
+          part,
+          <span className="wm" key={i}>
+            Rallytic
+          </span>,
+        ]
       : [part]
   );
 
@@ -90,11 +122,8 @@ export default function Page() {
     <div id="rsel">
       <style>{RSEL_CSS}</style>
 
-      <div className="rs-brand" key={`brand-${shimmerKey}`}>
-        <span className="rtile">R</span>
-        <span className="txt">
-          allyt<span className="i">i</span>c
-        </span>
+      <div key={`brand-${waveKey}`}>
+        <BrandWave />
       </div>
 
       <div className="rs-signin">
@@ -121,7 +150,7 @@ export default function Page() {
             icon="user-check"
             cta={t("coach.cta")}
             floatClass="gCoach rs-enter"
-            onHover={triggerShimmer}
+            onHover={triggerWave}
             points={[
               { icon: "users", title: t("coach.p1Title"), body: t("coach.p1Body") },
               { icon: "brain", title: t("coach.p2Title"), body: t("coach.p2Body") },
@@ -137,7 +166,7 @@ export default function Page() {
             icon="building-bank"
             cta={t("academy.cta")}
             floatClass="gAcad rs-enter"
-            onHover={triggerShimmer}
+            onHover={triggerWave}
             points={[
               { icon: "school", title: t("academy.p1Title"), body: t("academy.p1Body") },
               { icon: "chart-arcs", title: t("academy.p2Title"), body: t("academy.p2Body") },
@@ -161,6 +190,7 @@ const RSEL_CSS = `
   color:var(--fg); -webkit-font-smoothing:antialiased;
 }
 
+/* ---- BRAND with per-letter wave ---- */
 #rsel .rs-brand{position:absolute;top:28px;left:38px;z-index:30;padding:4px 6px;display:flex;align-items:center;gap:2px;line-height:1}
 [dir="rtl"] #rsel .rs-brand{left:auto;right:38px}
 #rsel .rs-brand .rtile{
@@ -169,35 +199,45 @@ const RSEL_CSS = `
   color:#0E1A00;font-weight:900;font-size:26px;letter-spacing:-.05em;line-height:1;
   margin-right:-2px;
   box-shadow:0 0 24px rgba(168,216,71,.30);
-  position:relative;overflow:hidden;
-}
-#rsel .rs-brand .rtile::after{
-  content:'';position:absolute;top:0;left:-150%;width:80%;height:100%;
-  background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.55) 50%,transparent 100%);
-  animation:rsBrandShine 1.6s ease-out;pointer-events:none;
 }
 #rsel .rs-brand .txt{
   font-size:30px;font-weight:900;letter-spacing:-.045em;line-height:1;
-  background-image:linear-gradient(95deg,var(--fg) 0%,var(--fg) 40%,#ffffff 50%,var(--fg) 60%,var(--fg) 100%);
-  background-size:260% 100%;background-position:200% 0;
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:transparent;
-  animation:rsBrandSweep 1.6s ease-out;
+  color:var(--fg);display:inline-flex;
+}
+/* Per-letter wave: each letter pops up, scales slightly, with stagger */
+#rsel .rs-brand .rs-letter{
+  display:inline-block;
+  animation:rsLetterWave 1s cubic-bezier(.4,.0,.2,1) both;
+  transform-origin:50% 100%;
 }
 #rsel .rs-brand .txt .i{
-  background-image:linear-gradient(95deg,var(--acc) 0%,var(--acc) 40%,#ffffff 50%,var(--acc) 60%,var(--acc) 100%);
-  background-size:260% 100%;background-position:200% 0;
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:transparent;
-  animation:rsBrandSweep 1.6s ease-out;
+  color:var(--acc) !important;
 }
-@keyframes rsBrandSweep{
-  from{background-position:200% 0}
-  to{background-position:-100% 0}
+@keyframes rsLetterWave{
+  0%   {transform:translateY(0) scale(1)}
+  35%  {transform:translateY(-10px) scale(1.08);color:#ffffff}
+  70%  {transform:translateY(0) scale(1)}
+  100% {transform:translateY(0) scale(1)}
 }
-@keyframes rsBrandShine{
-  from{left:-150%}
-  to{left:200%}
+/* For "i" the color flash uses the accent so it doesn't lose its hue */
+#rsel .rs-brand .txt .i{
+  animation-name:rsLetterWaveAcc;
+}
+@keyframes rsLetterWaveAcc{
+  0%   {transform:translateY(0) scale(1);color:var(--acc)}
+  35%  {transform:translateY(-10px) scale(1.15);color:#EAFFB0}
+  70%  {transform:translateY(0) scale(1);color:var(--acc)}
+  100% {transform:translateY(0) scale(1);color:var(--acc)}
+}
+/* R tile uses a slightly different wave — translates only */
+#rsel .rs-brand .rtile.rs-letter{
+  animation-name:rsTileWave;
+}
+@keyframes rsTileWave{
+  0%   {transform:translateY(0)}
+  35%  {transform:translateY(-10px);box-shadow:0 8px 32px rgba(168,216,71,.55)}
+  70%  {transform:translateY(0)}
+  100% {transform:translateY(0);box-shadow:0 0 24px rgba(168,216,71,.30)}
 }
 
 #rsel .rs-signin{position:absolute;top:34px;right:42px;z-index:30;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--dim)}
@@ -225,14 +265,14 @@ const RSEL_CSS = `
   will-change:transform;
 }
 
-/* Green glow ONLY on hover — sits behind the card */
+/* Full all-sides green halo behind card on hover, plus a soft outer glow */
 #rsel .rs-glass::before{
   content:'';
   position:absolute;
-  inset:-70px;
-  border-radius:50%;
-  background:radial-gradient(ellipse at center,rgba(168,216,71,.45),transparent 65%);
-  filter:blur(50px);
+  inset:-90px;
+  border-radius:36px;
+  background:radial-gradient(ellipse 80% 70% at center,rgba(168,216,71,.55) 0%,rgba(168,216,71,.18) 35%,transparent 70%);
+  filter:blur(38px);
   opacity:0;
   transition:opacity .55s ease;
   pointer-events:none;
@@ -249,7 +289,12 @@ const RSEL_CSS = `
   animation-play-state:paused;
   transform:translateY(-10px) rotateY(0deg) rotateX(0deg) translateZ(70px) scale(1.02);
   border-color:var(--accRing);
-  box-shadow:0 60px 110px -36px rgba(168,216,71,.45),0 0 0 1px var(--accRing), inset 0 1px 0 rgba(255,255,255,.18);
+  box-shadow:
+    0 0 60px rgba(168,216,71,.45),
+    0 0 120px rgba(168,216,71,.25),
+    0 60px 110px -36px rgba(168,216,71,.45),
+    0 0 0 1px var(--accRing),
+    inset 0 1px 0 rgba(255,255,255,.18);
 }
 
 #rsel .rs-ic{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:24px;color:var(--acc);background:linear-gradient(135deg,rgba(168,216,71,.20),rgba(168,216,71,.04));border:1px solid rgba(168,216,71,.30);transform:translateZ(60px);box-shadow:0 10px 24px -10px rgba(168,216,71,.5);margin-bottom:4px}

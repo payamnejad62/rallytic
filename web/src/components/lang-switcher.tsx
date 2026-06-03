@@ -43,27 +43,28 @@ export function LangSwitcher({ compact = false }: { compact?: boolean }) {
         className={"lang-trigger " + (compact ? "compact" : "")}
         aria-haspopup="listbox"
         aria-expanded={open}
+        title={meta.native}
       >
-        <span className="lang-flag">{meta.flag}</span>
-        {!compact && <span className="lang-name">{meta.native}</span>}
+        <span className="lang-flag-big">{meta.flag}</span>
         <span className="lang-caret">▾</span>
       </button>
       {open && (
         <div className="lang-menu" role="listbox">
           {LOCALES.map((loc) => {
             const m = LOCALE_NAMES[loc];
+            const active = loc === current;
             return (
               <button
                 key={loc}
                 type="button"
                 onClick={() => switchTo(loc)}
-                className={"lang-item" + (loc === current ? " on" : "")}
+                className={"lang-item-flag" + (active ? " on" : "")}
                 role="option"
-                aria-selected={loc === current}
+                aria-selected={active}
+                title={`${m.native} — ${m.en}`}
               >
-                <span className="lang-flag">{m.flag}</span>
-                <span className="lang-name">{m.native}</span>
-                <span className="lang-en">{m.en}</span>
+                <span className="lang-flag-xl">{m.flag}</span>
+                <span className="lang-code">{loc.toUpperCase()}</span>
               </button>
             );
           })}
